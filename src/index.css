@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --fundo: #f6f4f0;
+  --superficie: #ffffff;
+  --tinta: #1a1b20;
+  --suave: #6b6c73;
+  --linha: #e4e0d8;
+  --laranja: #e96b3c;
+  --laranja-forte: #c9552a;
+  --verde: #238a5c;
+  --perigo: #d6372b;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --fundo: #141519;
+  --superficie: #1d1e24;
+  --tinta: #f3f1ec;
+  --suave: #a3a4ac;
+  --linha: #2d2e36;
+  --laranja-forte: #f08a62;
+  --verde: #4cc48c;
+  --perigo: #ff8277;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-fundo: var(--fundo);
+  --color-superficie: var(--superficie);
+  --color-tinta: var(--tinta);
+  --color-suave: var(--suave);
+  --color-linha: var(--linha);
+  --color-laranja: var(--laranja);
+  --color-laranja-forte: var(--laranja-forte);
+  --color-verde: var(--verde);
+  --color-perigo: var(--perigo);
+
+  --radius-cartao: 20px;
+  --ease-mola: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-fundo font-sans text-tinta antialiased;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  :focus-visible {
+    outline: 3px solid var(--laranja);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply mx-auto w-full max-w-[1040px] px-4 sm:px-6;
+  }
+
+  .cartao {
+    @apply rounded-cartao border border-linha bg-superficie;
+  }
+  .cartao-hover {
+    @apply transition-[translate,box-shadow,border-color] duration-300 ease-mola hover:-translate-y-1.5 hover:border-laranja hover:shadow-[0_18px_32px_-16px_rgba(0,0,0,0.3)];
+  }
+
+  .campo {
+    @apply w-full rounded-xl border-[1.5px] border-linha bg-fundo px-3.5 py-3 text-base text-tinta transition-colors placeholder:text-suave/70 focus:border-laranja focus:outline-none;
+  }
+  .campo-erro {
+    @apply border-perigo;
+  }
+
+  .chip {
+    @apply inline-flex min-h-10 items-center rounded-full border-[1.5px] border-linha bg-superficie px-4 text-[14.5px] font-medium transition-[translate,border-color,background-color] duration-150 hover:-translate-y-0.5 hover:border-tinta;
+  }
+  .chip-ativo {
+    @apply border-tinta bg-tinta text-fundo;
+  }
+
+  .pilula {
+    @apply inline-block rounded-full border-[1.5px] border-current px-3 py-0.5 text-[13px] font-semibold whitespace-nowrap;
+  }
+
+  .marca-ja {
+    @apply relative font-[inherit];
+  }
+  .marca-ja::before {
+    content: "";
+    position: absolute;
+    left: 0.2em;
+    top: -0.02em;
+    width: 0.3em;
+    height: 0.13em;
+    background: var(--laranja);
+    transform: skewX(-35deg) rotate(-22deg);
+    border-radius: 1px;
+  }
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.pagina {
+  animation: entrar 0.5s var(--ease-mola) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
