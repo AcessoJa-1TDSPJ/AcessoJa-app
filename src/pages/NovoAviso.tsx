@@ -12,10 +12,11 @@ import { registrarAviso } from "../services/avisoService";
 import { listarCategorias } from "../services/categoriaService";
 import type { NovoAvisoForm } from "../types";
 import { nomeCategoria, perguntaAcontecendoAgora } from "../utils/formatar";
+import { reduzirFoto } from "../utils/imagem";
 
-const LIMITE_FOTO = 5 * 1024 * 1024;
+const LIMITE_FOTO = 20 * 1024 * 1024;
 const LIMITE_DESCRICAO = 300;
-const DICA_FOTO = "JPG, PNG ou WEBP de até 5 MB. Mostre o local, sem rostos.";
+const DICA_FOTO = "JPG, PNG ou WEBP. A foto é reduzida antes do envio. Mostre o local, sem rostos.";
 
 type Resultado = { tipo: "sucesso"; id: number } | { tipo: "erro"; mensagem: string; idExistente?: number };
 
@@ -66,10 +67,11 @@ export default function NovoAviso() {
         descricao: dados.descricao.trim(),
         endereco: dados.endereco.trim(),
         bairro: dados.bairro.trim(),
-        foto: dados.foto[0],
+        foto: await reduzirFoto(dados.foto[0]),
         acontecendoAgora: ehDelito ? dados.acontecendoAgora === "sim" : undefined,
       });
-      setResultado({ tipo: "sucesso", id: criado.id });
+      const idCriado = criado?.id ?? (criado as unknown as { aviso?: { id: number } })?.aviso?.id;
+      setResultado({ tipo: "sucesso", id: idCriado ?? 0 });
       reset();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (erro) {
@@ -96,7 +98,7 @@ export default function NovoAviso() {
           {resultado?.tipo === "sucesso" && (
             <Mensagem tipo="sucesso">
               Aviso publicado com o status “Não recebida”. Agora ele aguarda 3 confirmações.{" "}
-              <Link to={`/avisos/${resultado.id}`} className="underline">Ver aviso</Link>
+              {resultado.id > 0 && <Link to={`/avisos/${resultado.id}`} className="underline">Ver aviso</Link>}
             </Mensagem>
           )}
           {resultado?.tipo === "erro" && (
@@ -207,7 +209,7 @@ export default function NovoAviso() {
                   validate: {
                     obrigatoria: (lista) => (lista && lista.length > 0) || "Anexe uma foto como prova.",
                     tipo: (lista) => !lista?.[0] || lista[0].type.startsWith("image/") || "O arquivo precisa ser uma imagem.",
-                    tamanho: (lista) => !lista?.[0] || lista[0].size <= LIMITE_FOTO || "A foto precisa ter no máximo 5 MB.",
+                    tamanho: (lista) => !lista?.[0] || lista[0].size <= LIMITE_FOTO || "A foto precisa ter no máximo 20 MB.",
                   },
                 })}
               />

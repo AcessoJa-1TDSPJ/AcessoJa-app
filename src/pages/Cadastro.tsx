@@ -12,7 +12,7 @@ import { useVoltarPara } from "../hooks/useVoltarPara";
 import type { CadastroForm } from "../types";
 import { REGEX_EMAIL } from "../utils/formatar";
 
-const MIN_SENHA = 6;
+const MIN_SENHA = 8;
 
 export default function Cadastro() {
   useDocumentTitle("Criar conta");
