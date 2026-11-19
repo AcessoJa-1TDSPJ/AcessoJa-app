@@ -27,11 +27,13 @@ const mensagens: Record<number, string> = {
   501: "Este recurso ainda não está disponível na API.",
 };
 
-const TEMPO_LIMITE_MS = 60000;
+const TEMPO_LEITURA_MS = 60000;
+const TEMPO_ESCRITA_MS = 150000;
 
 export async function requisicao<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
+  const escrita = (opcoes.method ?? "GET").toUpperCase() !== "GET";
   const controller = new AbortController();
-  const tempo = setTimeout(() => controller.abort(), TEMPO_LIMITE_MS);
+  const tempo = setTimeout(() => controller.abort(), escrita ? TEMPO_ESCRITA_MS : TEMPO_LEITURA_MS);
   const ehFormData = opcoes.body instanceof FormData;
   const sessao = lerSessao();
   const identificacao: Record<string, string> = sessao
@@ -75,6 +77,9 @@ export async function requisicao<T>(caminho: string, opcoes: RequestInit = {}): 
     return dados as T;
   } catch (erro) {
     if (erro instanceof ErroApi) throw erro;
+    if (escrita) {
+      throw new Error("A API não confirmou a tempo, mas a operação pode ter sido registrada. Confira em Ocorrências antes de enviar de novo.");
+    }
     if (erro instanceof Error && erro.name === "AbortError") {
       throw new Error("A API demorou para responder. Aguarde alguns instantes e tente novamente.");
     }
